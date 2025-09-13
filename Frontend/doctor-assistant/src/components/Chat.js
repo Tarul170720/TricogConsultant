@@ -101,35 +101,53 @@ export default function Chat({
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Type or speak your response..."
-        />
-        <button style={styles.button} onClick={() => sendMessage()}>
-          Send
-        </button>
-        <button
-          style={{
-            ...styles.button,
-            backgroundColor: listening ? "red" : "green",
-          }}
-          onClick={() => {
-            if (listening) {
-              SpeechRecognition.stopListening();
-            } else {
-              SpeechRecognition.startListening({
-                continuous: true,
-                language: "en-US",
-              });
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              sendMessage();
             }
           }}
-        >
-          {listening ? "Stop 🎤" : "Speak 🎙️"}
-        </button>
-        <button
-          style={{ ...styles.button, backgroundColor: "orange" }}
-          onClick={() => window.speechSynthesis.cancel()}
-        >
-          🛑 Stop Talking
-        </button>
-      </div>
+        />
+
+        <span class="material-symbols-outlined">
+          <button style={{ ...styles.chatButton, backgroundColor: "#8db48bff", color: "#173463" }} onClick={() => sendMessage()}>
+            send
+          </button>
+        </span>
+        <span class="material-symbols-outlined">
+          <button
+            style={{
+              ...styles.chatButton,
+              backgroundColor: listening ? "#e85656ff" : "#173463",
+            }}
+            onClick={() => {
+              if (listening) {
+                SpeechRecognition.stopListening();
+              } else {
+                SpeechRecognition.startListening({
+                  continuous: true,
+                  language: "en-US",
+                });
+              }
+            }}
+          >
+            {listening ?
+              "mic"
+              :
+              "mic_off"
+            }
+          </button>
+        </span>
+        <span class="material-symbols-outlined">
+          <button
+            style={{ ...styles.chatButton, backgroundColor: "#b32d2d" }}
+            onClick={() => window.speechSynthesis.cancel()}
+            tooltip="Stop any ongoing speech"
+          >
+            stop_circle
+          </button>
+        </span>
+      </div >
     </>
   );
 }

@@ -1,14 +1,12 @@
 import { useState, useEffect } from "react";
 import { socket } from "../services/socket";
 import Chat from "./Chat";
-import AdminPanel from "./AdminPanel";
 import styles from "../styles";
 
 function PageWrapper() {
   const [messages, setMessages] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState(null);
   const [stage, setStage] = useState("name");
-  const [view, setView] = useState("chat");
 
   useEffect(() => {
     socket.on("bot_message", (data) => {
@@ -42,35 +40,21 @@ function PageWrapper() {
 
   return (
     <div style={styles.container}>
-      <h2>👩‍⚕️ Cardio Consult</h2>
-      <div style={styles.tabBar}>
-        <button
-          style={view === "chat" ? styles.activeTab : styles.tab}
-          onClick={() => setView("chat")}
-        >
-          💬 Chat
-        </button>
-        <button
-          style={view === "admin" ? styles.activeTab : styles.tab}
-          onClick={() => setView("admin")}
-        >
-          ⚙️ Admin
-        </button>
-      </div>
-
-      {view === "chat" ? (
-        <Chat
-          messages={messages}
-          setMessages={setMessages}
-          stage={stage}
-          setStage={setStage}
-          currentQuestion={currentQuestion}
-          setCurrentQuestion={setCurrentQuestion}
-          styles={styles}
-        />
-      ) : (
-        <AdminPanel styles={styles} />
-      )}
+      <h2 style={{ textAlign: "center", }}>
+        <span class="material-symbols-outlined" style={{ color: '#b32d2d', fontSize: '2.5rem', verticalAlign: 'middle', marginRight: '10px' }}>
+          cardiology
+        </span>
+        Cardio Consult
+        </h2>
+      <Chat
+        messages={messages}
+        setMessages={setMessages}
+        stage={stage}
+        setStage={setStage}
+        currentQuestion={currentQuestion}
+        setCurrentQuestion={setCurrentQuestion}
+        styles={styles}
+      />
     </div>
   );
 }

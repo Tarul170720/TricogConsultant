@@ -37,7 +37,7 @@ export default function MessageList({ messages, styles }) {
             style={{
               ...styles.message,
               alignSelf: msg.sender === "patient" ? "flex-end" : "flex-start",
-              backgroundColor: msg.sender === "patient" ? "#DCF8C6" : "#E5E5EA",
+              backgroundColor: msg.sender === "patient" ? "#c5cde9ff" : "#E5E5EA",
             }}
           >
             {msg.symptoms && msg.symptoms.length > 0 ? (

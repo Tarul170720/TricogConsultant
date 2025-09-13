@@ -33,8 +33,9 @@ const styles = {
     flex: 1,
     padding: "10px",
     borderRadius: "5px",
-    border: "1px solid #ccc",
-    marginBottom: "10px",
+    border: "1px solid #da9a9aff",
+    marginBottom: "6px",
+    height: "50px",
   },
   textarea: {
     width: "100%",
@@ -110,6 +111,14 @@ const styles = {
   ruleList: {
     padding: "8px 20px",
     background: "#fafafa",
+  },
+  chatButton: {
+    border: "none",
+    borderRadius: "5px",
+    color: "white",
+    cursor: "pointer",
+    width: "50px",
+    height: "50px",
   },
 };
 
