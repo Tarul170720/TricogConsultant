@@ -1,7 +1,10 @@
 package com.cardio.ai.cardio_consult.service.impl;
 
+import com.cardio.ai.cardio_consult.entity.Doctor;
+import com.cardio.ai.cardio_consult.repository.DoctorRepository;
 import com.cardio.ai.cardio_consult.service.TelegramService;
 import com.cardio.ai.cardio_consult.service.dto.TelegramMessageDTO;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
@@ -24,6 +27,9 @@ public class TelegramServiceImpl implements TelegramService {
     @Value("${telegram.api.bot_token}")
     private String BOT_TOKEN;
 
+    @Autowired
+    private DoctorRepository doctorRepository;
+
     private static final String SEND_MESSAGE = "/sendMessage";
 
     @Override
@@ -31,7 +37,8 @@ public class TelegramServiceImpl implements TelegramService {
         try {
             restClient = RestClient.builder().build();
             Map<String, Object> requestBody = new HashMap<>();
-            requestBody.put("chat_id", "549179093");
+            Doctor doctor = doctorRepository.getReferenceById(1l);
+            requestBody.put("chat_id", doctor.getChatId());
             requestBody.put("text", messageDTO.getMessage());
             ParameterizedTypeReference<Map<String, Object>> parameterizedTypeReference = new ParameterizedTypeReference<Map<String, Object>>() {
             };

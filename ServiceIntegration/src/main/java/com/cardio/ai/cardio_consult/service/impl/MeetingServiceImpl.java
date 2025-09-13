@@ -1,5 +1,7 @@
 package com.cardio.ai.cardio_consult.service.impl;
 
+import com.cardio.ai.cardio_consult.entity.Doctor;
+import com.cardio.ai.cardio_consult.repository.DoctorRepository;
 import com.cardio.ai.cardio_consult.service.GoogleCalendarService;
 import com.cardio.ai.cardio_consult.service.MeetingService;
 import com.cardio.ai.cardio_consult.service.dto.MeetingRequestDTO;
@@ -24,19 +26,20 @@ public class MeetingServiceImpl implements MeetingService {
 
     private final GoogleCalendarService calendarService;
 
-    public MeetingServiceImpl(GoogleCalendarService calendarService) {
-        this.calendarService = calendarService;
-    }
+    private final DoctorRepository doctorRepository;
 
-    @Value("${doctor.email}")
-    private String doctorEmail;
+    public MeetingServiceImpl(GoogleCalendarService calendarService, DoctorRepository doctorRepository) {
+        this.calendarService = calendarService;
+        this.doctorRepository = doctorRepository;
+    }
 
     @Override
     public ResponseEntity<String> sendCalendarMeeting(MeetingRequestDTO meetingRequestDTO) {
         log.info("Sending calendar invite to user email: {}", meetingRequestDTO);
         try {
             String userEmail = meetingRequestDTO.userEmail();
-            String meetLink = calendarService.createMeeting(userEmail, doctorEmail, meetingRequestDTO.startTime());
+            Doctor doctor = doctorRepository.getReferenceById(1l);
+            String meetLink = calendarService.createMeeting(userEmail, doctor.getEmail(), meetingRequestDTO.startTime(), doctor.getName());
             return ResponseEntity.ok(meetLink);
         } catch (Exception e) {
             log.debug("Exception occured while creating meeting: {}", e.getMessage(), e);
@@ -47,7 +50,8 @@ public class MeetingServiceImpl implements MeetingService {
     @Override
     public ResponseEntity<List<ZonedDateTime>> fetchAllAvailableSlots() {
         try {
-            return ResponseEntity.ok(calendarService.findOrganizerSlots(LocalDate.now(), doctorEmail));
+            Doctor doctor = doctorRepository.getReferenceById(1l);
+            return ResponseEntity.ok(calendarService.findOrganizerSlots(LocalDate.now(), doctor.getEmail()));
         } catch (IOException e) {
             log.debug("Exception occured while fetching meeting slots: {}", e.getMessage(), e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

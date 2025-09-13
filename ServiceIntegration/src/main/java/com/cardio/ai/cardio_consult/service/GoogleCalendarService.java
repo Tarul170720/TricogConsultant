@@ -22,10 +22,10 @@ public class GoogleCalendarService {
         this.calendar = calendar;
     }
 
-    public String createMeeting(String userEmail, String organizerEmail, ZonedDateTime startTime) throws IOException {
+    public String createMeeting(String userEmail, String organizerEmail, ZonedDateTime startTime, String doctorName) throws IOException {
         Event event = new Event()
                 .setSummary("Cardiology consult")
-                .setDescription("consult with doctor for " + userEmail + " via CardioConsult");
+                .setDescription("Consult with Dr." + doctorName +" for " + userEmail + " via CardioConsult");
 
         EventDateTime start = new EventDateTime()
                 .setDateTime(new DateTime(Date.from(startTime.toInstant())))
@@ -115,7 +115,17 @@ public class GoogleCalendarService {
                                                String organizerEmail) throws IOException {
 
         LocalTime workStart = LocalTime.of(10, 0);
-        LocalTime workEnd = LocalTime.of(17, 30);
+        LocalTime workEnd = LocalTime.of(22, 30);
+        LocalTime currentTime = LocalTime.now();
+        if(currentTime.isAfter(workStart)) {
+            int minute = currentTime.getMinute();
+            int ceilMinute = ((minute + 4) / 5) * 5; // next multiple of 5
+            if (ceilMinute == 60) {
+                workStart = currentTime.plusHours(1).withMinute(0).withSecond(0).withNano(0);
+            } else {
+                workStart = currentTime.withMinute(ceilMinute).withSecond(0).withNano(0);
+            }
+        }
         ZonedDateTime dayStart = ZonedDateTime.of(date, workStart, ZoneId.systemDefault());
         ZonedDateTime dayEnd   = ZonedDateTime.of(date, workEnd, ZoneId.systemDefault());
 

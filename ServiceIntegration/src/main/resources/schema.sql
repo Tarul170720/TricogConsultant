@@ -1,0 +1,6 @@
+CREATE TABLE DOCTOR (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT,
+    email TEXT,
+    chat_id TEXT
+);
