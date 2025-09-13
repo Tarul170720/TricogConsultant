@@ -6,10 +6,9 @@ const styles = {
     border: "1px solid #ccc",
     borderRadius: "10px",
     backgroundColor: "white",
-    fontFamily: "Arial, sans-serif",
   },
   chatBox: {
-    height: "400px",
+    height: "300px",
     overflowY: "auto",
     display: "flex",
     flexDirection: "column",
@@ -68,9 +67,9 @@ const styles = {
   activeTab: {
     flex: 1,
     padding: "10px",
-    border: "1px solid #007BFF",
+    border: "1px solid #b32d2d",
     borderRadius: "5px",
-    background: "#007BFF",
+    background: "#b32d2d",
     color: "white",
     cursor: "pointer",
   },
@@ -80,7 +79,6 @@ const styles = {
     borderRadius: "12px",
     padding: "15px",
     margin: "10px 0",
-    fontFamily: "monospace",
     whiteSpace: "pre-wrap",
   },
   symptomHeader: {

@@ -112,11 +112,10 @@ const styles = {
     border: "1px solid #ccc",
     borderRadius: "10px",
     backgroundColor: "white",
-    fontFamily: "Arial, sans-serif",
   },
   chatBox: {
     height: "400px",
-    overflowY: "auto",
+    // overflowY: "auto",
     display: "flex",
     flexDirection: "column",
     gap: "10px",
