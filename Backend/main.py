@@ -75,6 +75,33 @@ async def add_symptom(rule: dict = Body(...), db: AsyncSession = Depends(get_db)
     await db.refresh(new_rule)
     return {"symptom": new_rule.symptom_key, "questions": new_rule.follow_up_questions}
 
+# Escalations alias endpoints
+@app.get("/escalations", response_model=list[FollowUpRuleOut])
+async def get_escalations(db: AsyncSession = Depends(get_db)):
+    res = await db.execute(select(FollowUpRule))
+    return res.scalars().all()   # ✅ now works because orm_mode=True
+@app.post("/escalations", response_model=FollowUpRuleOut)
+async def create_escalation(rule: dict = Body(...), db: AsyncSession = Depends(get_db)):
+    new_rule = FollowUpRule(
+        symptom_key=rule["symptom_key"],
+        question_pattern=rule["question_pattern"],
+        trigger_values=rule["trigger_values"],
+        new_urgency=rule["new_urgency"],
+    )
+    db.add(new_rule)
+    await db.commit()
+    await db.refresh(new_rule)
+    return new_rule
+
+@app.delete("/escalations/{rule_id}")
+async def delete_escalation(rule_id: int, db: AsyncSession = Depends(get_db)):
+    rule = await db.get(FollowUpRule, rule_id)
+    if not rule:
+        raise HTTPException(status_code=404, detail="Escalation not found")
+    await db.delete(rule)
+    await db.commit()
+    return {"message": "Escalation deleted"}
+
 
 @app.get("/followup-rules", response_model=list[FollowUpRuleOut])
 async def get_followup_rules(db: AsyncSession = Depends(get_db)):
@@ -177,18 +204,10 @@ async def start_consult(sid, data):
         # ---- Step 2: Age ----
         if stage == "ask_age":
             raw_age = data.get("age") if isinstance(data, dict) else str(data)
-            extracted_age = await extract_field("age", raw_age)
-            clean_age = extracted_age or raw_age
-
-            # optional regex cleanup (take first number if exists)
-            m = re.search(r"\d+", clean_age)
-            if m:
-                state["age"] = m.group(0)   # store just number string
-            else:
-                state["age"] = clean_age    # fallback raw
-
+            extracted_age = await extract_field("age", str(raw_age))
+            state["age"] = extracted_age or str(raw_age).strip()
             state["stage"] = "ask_email"
-            phrased = await rephrase_followup(state["name"], "Now please provide your email ID.")
+            phrased = await rephrase_followup(state["age"], "Now please provide your email ID.")
             await sio.emit("bot_message", {"msg": phrased}, to=sid)
             return
         # ---- Step 3: Email ----
@@ -210,7 +229,7 @@ async def start_consult(sid, data):
                 else:
                     patient = Patient(
                         name=state["name"],
-                        age=state.get("age"),
+                        age=state.get["age"],
                         email=state["email"],
                     )
                     db.add(patient)
@@ -225,7 +244,7 @@ async def start_consult(sid, data):
                 SID_TO_CONSULT[sid] = {
                     "id": consult.id,
                     "name": state["name"],
-                    "age": state.get("age"),
+                    "age": state.get["age"],
                     "email": state["email"],
                 }
 
@@ -433,6 +452,7 @@ async def _send_doctor_summary_and_finish(sid):
                 ""
             ]
 
+            # 📝 Regular Q/A answers
             for s in (consult.symptoms or []):
                 summary_lines.append(f"--- {s} ---")
                 answers = (consult.follow_up_answers or {}).get(s, [])
@@ -453,6 +473,31 @@ async def _send_doctor_summary_and_finish(sid):
                                 summary_lines.append(f"🧾 Doctor Note: {doc_note}")
                     summary_lines.append("")
 
+            # 🆙 Add escalation info separately
+            res = await db.execute(select(FollowUpRule))
+            followup_rules = res.scalars().all()
+
+            escalation_notes = []
+            for s, answers in (consult.follow_up_answers or {}).items():
+                for qa in answers:
+                    q = qa.get("question", "")
+                    a = qa.get("answer", "")
+
+                    for rule in followup_rules:
+                        if rule.symptom_key != s:
+                            continue
+                        if re.search(rule.question_pattern, q, re.I) and any(
+                            tv.lower() in a.lower() for tv in rule.trigger_values
+                        ):
+                            escalation_notes.append(
+                                f"{s}: Escalated → {rule.new_urgency.upper()} (Q matched '{rule.question_pattern}', Answer matched)"
+                            )
+
+            if escalation_notes:
+                summary_lines.append("⚠️ Escalations Applied:")
+                summary_lines.extend(escalation_notes)
+
+            # Finalize
             summary_text = "\n".join(summary_lines)
             await sio.emit("bot_message", {"msg": summary_text}, to=sid)
             await sio.emit("bot_message", {"msg": "✅ Thanks — I have all your answers. I'll notify the doctor."}, to=sid)
@@ -499,28 +544,83 @@ import re
 from models import Patient, Consult, SymptomRule, FollowUpRule
 
 # ---------------- Helpers ---------------- #
+# ---------------- Helpers ---------------- #
+async def judge_rule_match(question: str, answer: str, rule: FollowUpRule) -> bool:
+    """
+    Use the LLM to decide if a patient's answer effectively satisfies a follow-up rule,
+    even if it doesn't literally match regex/trigger values.
+    """
+    from llm import call_llm  # reuse your existing LLM call
+
+    prompt = f"""
+    You are a medical reasoning assistant. 
+
+    Follow-up Rule:
+    - Symptom: {rule.symptom_key}
+    - Question pattern: {rule.question_pattern}
+    - Trigger values: {rule.trigger_values}
+    - Intended urgency level: {rule.new_urgency}
+
+    Patient's response:
+    Q: {question}
+    A: {answer}
+
+    Based on the rule's intent, does the patient's answer satisfy the condition?
+    Reply strictly with JSON: {{"match": true}} or {{"match": false}}
+    """
+
+    try:
+        raw = await call_llm(prompt, system="You are a strict JSON generator.", max_tokens=50)
+        import json
+        data = json.loads(raw)
+        return data.get("match", False)
+    except Exception as e:
+        logger.warning("LLM rule match failed: %s", e)
+        return False
+
+
 async def determine_urgency(symptoms, follow_up_answers, db):
     # 1. Base urgency from symptom rules
     res = await db.execute(select(SymptomRule))
     symptom_rules = res.scalars().all()
     urgency = "normal"
-    urgency_rank = {"normal": 0, "semi-urgent": 1, "urgent": 2, "very_urgent": 3}
+
+    urgency_rank = {
+        "normal": 0,
+        "semi-urgent": 1,
+        "urgent": 2,
+        "very_urgent": 3,
+        "high": 4
+    }
 
     for s in symptoms:
         rule = next((r for r in symptom_rules if r.symptom_key == s), None)
-        if rule and urgency_rank[rule.urgency] > urgency_rank[urgency]:
+        if rule and urgency_rank.get(rule.urgency, 0) > urgency_rank[urgency]:
             urgency = rule.urgency
 
     # 2. Escalation from follow-up answers
     res = await db.execute(select(FollowUpRule))
     followup_rules = res.scalars().all()
+
     for s, answers in (follow_up_answers or {}).items():
         for qa in answers:
-            q, a = qa.get("question", ""), qa.get("answer", "").lower()
+            q = qa.get("question", "")
+            a = (qa.get("answer") or "").lower()
+
             for rule in followup_rules:
-                if rule.symptom_key == s and re.search(rule.question_pattern, q, re.I):
+                if rule.symptom_key != s:
+                    continue
+
+                # --- literal regex + string match ---
+                if re.search(rule.question_pattern, q, re.I):
                     if any(tv.lower() in a for tv in rule.trigger_values):
                         if urgency_rank[rule.new_urgency] > urgency_rank[urgency]:
                             urgency = rule.new_urgency
+                            continue
+
+                    # --- 🔥 LLM semantic fallback ---
+                    llm_match = await judge_rule_match(q, a, rule)
+                    if llm_match and urgency_rank[rule.new_urgency] > urgency_rank[urgency]:
+                        urgency = rule.new_urgency
 
     return urgency

@@ -125,3 +125,4 @@ async def extract_field(field: str, user_text: str) -> str | None:
         return str(data.get(field))
     except Exception:
         return None
+    
