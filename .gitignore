@@ -26,3 +26,20 @@ Thumbs.db
 # IDEs
 .vscode/
 .idea/
+
+#Java
+ServiceIntegration/HELP.md
+ServiceIntegration/target/
+ServiceIntegration/.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### IntelliJ IDEA ###
+ServiceIntegration/.idea
+ServiceIntegration/*.iws
+ServiceIntegration/*.iml
+ServiceIntegration/*.ipr
+
+ServiceIntegration/tokens
+ServiceIntegration/src/main/resources/application.properties
+ServiceIntegration/src/main/resources/credentials.json
