@@ -6,10 +6,7 @@ import com.cardio.ai.cardio_consult.service.dto.MeetingRequestDTO;
 import com.google.api.services.calendar.model.TimePeriod;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -26,7 +23,7 @@ public class MeetingResource {
     }
 
     @GetMapping("/available-slots")
-    public ResponseEntity<List<ZonedDateTime>> fetchAvailableSlots(){
-        return meetingService.fetchAllAvailableSlots();
+    public ResponseEntity<List<ZonedDateTime>> fetchAvailableSlots(@RequestParam(required = true) String doctorEmail){
+        return meetingService.fetchAllAvailableSlots(doctorEmail);
     }
 }

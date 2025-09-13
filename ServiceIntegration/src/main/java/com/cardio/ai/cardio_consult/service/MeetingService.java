@@ -11,5 +11,5 @@ public interface MeetingService {
 
     public ResponseEntity<String> sendCalendarMeeting(MeetingRequestDTO meetingRequestDTO);
 
-    public ResponseEntity<List<ZonedDateTime>> fetchAllAvailableSlots();
+    public ResponseEntity<List<ZonedDateTime>> fetchAllAvailableSlots(String doctorEmail);
 }
