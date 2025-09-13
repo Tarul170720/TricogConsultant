@@ -1,9 +1,9 @@
 export default function UrgencyBadge({ urgency }) {
   const colors = {
-    normal: { bg: "#4caf50", text: "white" },
-    "semi-urgent": { bg: "#ff9800", text: "white" },
-    urgent: { bg: "#f44336", text: "white" },
-    very_urgent: { bg: "#b71c1c", text: "white" },
+    normal: { bg: "#6bde6eff", text: "white" },
+    "semi-urgent": { bg: "#e3a445ff", text: "white" },
+    urgent: { bg: "#f34c40ff", text: "white" },
+    very_urgent: { bg: "#b32d2d", text: "white" },
   };
   const style = colors[urgency] || colors.normal;
 

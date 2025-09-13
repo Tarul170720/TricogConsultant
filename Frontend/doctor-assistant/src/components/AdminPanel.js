@@ -13,7 +13,7 @@ export default function AdminPanel({ styles }) {
   const [rules, setRules] = useState([]);
   const [newSymptom, setNewSymptom] = useState("");
   const [newQuestions, setNewQuestions] = useState("");
-  const [expanded, setExpanded] = useState(null);
+  const [expanded, setExpanded] = useState(null); // 0 to 3 for each card expanded
 
   const [escalations, setEscalations] = useState([]);
   const [showEscalationForm, setShowEscalationForm] = useState(false);
@@ -71,7 +71,7 @@ export default function AdminPanel({ styles }) {
     try {
       await deleteRule(id);
       setRules((prev) => prev.filter((r) => r.id !== id));
-      alert("🗑️ Rule deleted!");
+      alert("Rule deleted!");
     } catch (err) {
       console.error("Failed to delete rule", err);
     }
@@ -108,308 +108,314 @@ export default function AdminPanel({ styles }) {
     try {
       await deleteEscalation(id);
       setEscalations((prev) => prev.filter((e) => e.id !== id));
-      alert("🗑️ Escalation deleted!");
+      alert("Escalation deleted!");
     } catch (err) {
       console.error("Failed to delete escalation", err);
     }
   };
 
+  // Helper to toggle card open/close
+  const toggleExpanded = (index) => {
+    setExpanded(expanded === index ? null : index);
+  };
+
   return (
-    <div style={{ maxWidth: "900px", margin: "0 auto", padding: "20px" }}>
-      {/* Add Rule Section */}
-      <div
-        style={{
-          border: "1px solid #ddd",
-          borderRadius: "10px",
-          padding: "20px",
-          marginBottom: "40px",
-          background: "#fff",
-          boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
-        }}
-      >
-        <h3 style={{ marginBottom: "15px" }}>⚙️ Add New Symptom Rule</h3>
-        <input
-          style={{ ...styles.input, marginBottom: "10px" }}
-          value={newSymptom}
-          onChange={(e) => setNewSymptom(e.target.value)}
-          placeholder="Symptom name (e.g. headache)"
-        />
-        <textarea
-          style={{ ...styles.textarea, marginBottom: "10px" }}
-          value={newQuestions}
-          onChange={(e) => setNewQuestions(e.target.value)}
-          placeholder="Enter follow-up questions (one per line)"
-          rows={5}
-        />
-        <button style={styles.button} onClick={handleAddRule}>
-          ➕ Add Rule
-        </button>
-      </div>
-
-      {/* Existing Rules Section */}
-      <div
-        style={{
-          border: "1px solid #ddd",
-          borderRadius: "10px",
-          padding: "20px",
-          marginBottom: "40px",
-          background: "#fff",
-          boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
-        }}
-      >
-        <h3 style={{ marginBottom: "15px" }}>📋 Existing Rules</h3>
-        <div style={{ display: "grid", gap: "16px" }}>
-          {rules.map((r, i) => (
-            <div
-              key={i}
-              style={{
-                border: "1px solid #eee",
-                borderRadius: "8px",
-                padding: "14px",
-                background: "#f9f9f9",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  cursor: "pointer",
-                }}
-                onClick={() => setExpanded(expanded === i ? null : i)}
-              >
-                <span
-                  style={{
-                    background: "#007bff",
-                    color: "white",
-                    padding: "4px 12px",
-                    borderRadius: "6px",
-                    fontSize: "0.9em",
-                    fontWeight: "bold",
-                  }}
-                >
-                  {r.symptom}
-                </span>
-                <span style={{ fontSize: "1.2em" }}>
-                  {expanded === i ? "▲" : "▼"}
-                </span>
-              </div>
-              {expanded === i && (
-                <>
-                  <ul style={{ marginTop: "12px", paddingLeft: "20px" }}>
-                    {r.questions.map((q, j) => (
-                      <li
-                        key={j}
-                        style={{
-                          marginBottom: "6px",
-                          color: "#333",
-                          listStyleType: "disc",
-                        }}
-                      >
-                        {q}
-                      </li>
-                    ))}
-                  </ul>
-                  <button
-                    style={{
-                      background: "#ef4444",
-                      color: "white",
-                      border: "none",
-                      padding: "6px 10px",
-                      borderRadius: "6px",
-                      marginTop: "10px",
-                      cursor: "pointer",
-                    }}
-                    onClick={() => handleDeleteRule(r.id)}
-                  >
-                    🗑️ Delete Rule
-                  </button>
-                </>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Escalation Section */}
-      <div
-        style={{
-          border: "1px solid #ddd",
-          borderRadius: "10px",
-          padding: "20px",
-          marginBottom: "40px",
-          background: "#fff",
-          boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
-        }}
-      >
-        <h3 style={{ marginBottom: "15px" }}>⚠️ Escalation Rules</h3>
-        <button
-          style={{
-            ...styles.button,
-            background: "#10b981",
-            marginBottom: "20px",
-          }}
-          onClick={() => setShowEscalationForm(true)}
-        >
-          ➕ Add Escalation Rule
-        </button>
-
-        {/* Existing Escalations */}
-        <h3 style={{ marginTop: "20px", marginBottom: "15px" }}>
-          📋 Existing Escalations
-        </h3>
+    <div className="container my-4" style={{ maxWidth: "900px" }}>
+      {/* Card 0: Add New Symptom Rule */}
+      <div className="card mb-4 shadow-sm hover-shadow-lg">
         <div
-          style={{
-            display: "grid",
-            gap: "20px",
-            gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-            marginTop: "10px",
-          }}
+          className="card-header d-flex justify-content-between align-items-center"
+          style={{ cursor: "pointer" }}
+          onClick={() => toggleExpanded(0)}
         >
-          {escalations.map((e, i) => (
-            <div
-              key={i}
-              style={{
-                border: "1px solid #e5e7eb",
-                borderRadius: "12px",
-                padding: "18px",
-                background: "linear-gradient(135deg, #ffffff, #f9fafb)",
-                boxShadow: "0 4px 8px rgba(0,0,0,0.05)",
-              }}
-            >
-              <div
-                style={{
-                  display: "inline-block",
-                  background: "#007bff",
-                  color: "white",
-                  padding: "4px 12px",
-                  borderRadius: "8px",
-                  fontWeight: "bold",
-                  marginBottom: "12px",
-                }}
-              >
-                {e.symptom_key}
-              </div>
-              <div style={{ marginBottom: "10px", color: "#374151" }}>
-                <strong>If Q matches:</strong>{" "}
-                <code
-                  style={{
-                    background: "#f3f4f6",
-                    padding: "2px 6px",
-                    borderRadius: "6px",
-                  }}
-                >
-                  {e.question_pattern}
-                </code>
-              </div>
-              <div style={{ marginBottom: "10px", color: "#374151" }}>
-                <strong>and Answer in:</strong> [{e.trigger_values.join(", ")}]
-              </div>
-              <div style={{ marginBottom: "10px" }}>
-                <strong>Escalate to:</strong>{" "}
-                <UrgencyBadge urgency={e.new_urgency} />
-              </div>
-              <button
-                style={{
-                  background: "#ef4444",
-                  color: "white",
-                  border: "none",
-                  padding: "6px 10px",
-                  borderRadius: "6px",
-                  marginTop: "8px",
-                  cursor: "pointer",
-                }}
-                onClick={() => handleDeleteEscalation(e.id)}
-              >
-                🗑️ Delete Escalation
-              </button>
-            </div>
-          ))}
+          <h5 className="mb-0">
+            <span class="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '8px', color: '#b32d2d' }}>
+              add
+            </span>
+            Add New Symptom Rule</h5>
+          <span style={{ fontSize: "1.2em" }}>
+            {expanded === 0 ?
+              <span class="material-symbols-outlined">
+                keyboard_arrow_down
+              </span>
+              :
+              <span class="material-symbols-outlined">
+                keyboard_arrow_up
+              </span>}
+          </span>
         </div>
+        {expanded === 0 && (
+          <div className="card-body">
+            <input
+              className="form-control mb-3"
+              value={newSymptom}
+              onChange={(e) => setNewSymptom(e.target.value)}
+              placeholder="Symptom name (e.g. headache)"
+            />
+            <textarea
+              className="form-control mb-3"
+              value={newQuestions}
+              onChange={(e) => setNewQuestions(e.target.value)}
+              placeholder="Enter follow-up questions (one per line)"
+              rows={5}
+            />
+            <button className="btn btn-primary" onClick={handleAddRule} style={{ backgroundColor: '#173463' }}>
+              Add Rule
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Card 1: Existing Rules */}
+      <div className="card mb-4 shadow-sm hover-shadow-lg">
+        <div
+          className="card-header d-flex justify-content-between align-items-center"
+          style={{ cursor: "pointer" }}
+          onClick={() => toggleExpanded(1)}
+        >
+          <h5 className="mb-0">
+            <span class="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '8px', color: '#b32d2d' }}>
+              list
+            </span>
+            Existing Rules</h5>
+          <span style={{ fontSize: "1.2em" }}>
+            {expanded === 0 ?
+              <span class="material-symbols-outlined">
+                keyboard_arrow_down
+              </span>
+              :
+              <span class="material-symbols-outlined">
+                keyboard_arrow_up
+              </span>}
+          </span>
+        </div>
+        {expanded === 1 && (
+          <div className="card-body">
+            {rules.length === 0 && <p>No rules added yet.</p>}
+            <div className="list-group">
+              {rules.map((r, i) => (
+                <div key={r.id} className="list-group-item mb-2 rounded">
+                  <div
+                    className="d-flex justify-content-between align-items-center"
+                    style={{ cursor: "pointer" }}
+                    onClick={() =>
+                      setExpanded(
+                        expanded === `rule-${i}` ? null : `rule-${i}`
+                      )
+                    }
+                  >
+                    <span className="badge-pill badge-info badge-dark fs-6">{r.symptom}</span>
+                    <span style={{ fontSize: "1.2em" }}>
+                      {expanded === `rule-${i}` ?
+                        <span class="material-symbols-outlined">
+                          keyboard_arrow_down
+                        </span>
+                        :
+                        <span class="material-symbols-outlined">
+                          keyboard_arrow_up
+                        </span>}
+                    </span>
+                  </div>
+                  {expanded === `rule-${i}` && (
+                    <>
+                      <ul className="mt-3 ps-3">
+                        {r.questions.map((q, j) => (
+                          <li key={j} className="mb-1">
+                            {q}
+                          </li>
+                        ))}
+                      </ul>
+                      <button
+                        className="btn btn-sm mt-2" style={{ backgroundColor: '#b32d2d', color: '#fff' }}
+                        onClick={() => handleDeleteRule(r.id)}
+                      >
+                        Delete Rule
+                      </button>
+                    </>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Card 2: Add Escalation Rule (button + modal) */}
+      <div className="card mb-4 shadow-sm hover-shadow-lg">
+        <div
+          className="card-header d-flex justify-content-between align-items-center"
+          style={{ cursor: "pointer" }}
+          onClick={() => toggleExpanded(2)}
+        >
+          <h5 className="mb-0">
+            <span class="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '8px', color: '#b32d2d' }}>
+              pulse_alert
+            </span>
+            Escalation Rules</h5>
+          <span style={{ fontSize: "1.2em" }}>
+            {expanded === 2 ?
+              <span class="material-symbols-outlined">
+                keyboard_arrow_down
+              </span> :
+              <span class="material-symbols-outlined">
+                keyboard_arrow_up
+              </span>}
+          </span>
+        </div>
+        {expanded === 2 && (
+          <div className="card-body">
+            <button
+              className="btn btn-success"
+              onClick={() => setShowEscalationForm(true)}
+              style={{ backgroundColor: '#173463' }}
+            >
+              Add Escalation Rule
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Card 3: Existing Escalations */}
+      <div className="card mb-4">
+        <div
+          className="card-header d-flex justify-content-between align-items-center"
+          style={{ cursor: "pointer" }}
+          onClick={() => toggleExpanded(3)}
+        >
+          <h5 className="mb-0">
+            <span class="material-symbols-outlined" style={{ verticalAlign: 'middle', marginRight: '8px', color: '#b32d2d' }}>
+              data_alert
+            </span>
+            Existing Escalations</h5>
+          <span style={{ fontSize: "1.2em" }}>
+            {expanded === 3 ?
+              <span class="material-symbols-outlined">
+                keyboard_arrow_down
+              </span> :
+              <span class="material-symbols-outlined">
+                keyboard_arrow_up
+              </span>}
+          </span>
+        </div>
+        {expanded === 3 && (
+          <div className="card-body">
+            {escalations.length === 0 && <p>No escalations added yet.</p>}
+            <div className="row g-3">
+              {escalations.map((e) => (
+                <div key={e.id} className="col-md-6">
+                  <div className="card shadow-sm">
+                    <div className="card-body">
+                      <span className="badge-pill badge-info badge-dark mb-2">
+                        {e.symptom_key}
+                      </span>
+                      <div className="mb-2 text-secondary">
+                        <strong>If Q matches:</strong>{" "}
+                        <code>{e.question_pattern}</code>
+                      </div>
+                      <div className="mb-2 text-secondary">
+                        <strong>and Answer in:</strong>{" "}
+                        [{e.trigger_values.join(", ")}]
+                      </div>
+                      <div className="mb-3">
+                        <strong>Escalate to:</strong>{" "}
+                        <UrgencyBadge urgency={e.new_urgency} />
+                      </div>
+                      <button
+                        className="btn btn-sm" style={{ backgroundColor: '#b32d2d', color: '#fff' }}
+                        onClick={() => handleDeleteEscalation(e.id)}
+                      >
+                        Delete Escalation
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Escalation Modal */}
       {showEscalationForm && (
         <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: "rgba(0,0,0,0.5)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            zIndex: 9999,
-          }}
+          className="modal d-block"
+          tabIndex="-1"
+          role="dialog"
+          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
         >
           <div
-            style={{
-              background: "#fff",
-              padding: "20px",
-              borderRadius: "10px",
-              width: "400px",
-              boxShadow: "0 6px 12px rgba(0,0,0,0.2)",
-            }}
+            className="modal-dialog"
+            role="document"
+            style={{ maxWidth: "400px" }}
           >
-            <h3 style={{ marginBottom: "15px" }}>➕ Add Escalation Rule</h3>
-            <select
-              style={{ ...styles.input, marginBottom: "10px" }}
-              value={form.symptom_key}
-              onChange={(e) =>
-                setForm({ ...form, symptom_key: e.target.value })
-              }
-            >
-              <option value="">-- Select Symptom --</option>
-              {rules.map((r, i) => (
-                <option key={i} value={r.symptom}>
-                  {r.symptom}
-                </option>
-              ))}
-            </select>
-            <input
-              style={{ ...styles.input, marginBottom: "10px" }}
-              value={form.question_pattern}
-              onChange={(e) =>
-                setForm({ ...form, question_pattern: e.target.value })
-              }
-              placeholder="Question pattern (regex)"
-            />
-            <input
-              style={{ ...styles.input, marginBottom: "10px" }}
-              value={form.trigger_values}
-              onChange={(e) =>
-                setForm({ ...form, trigger_values: e.target.value })
-              }
-              placeholder="Trigger values (comma separated)"
-            />
-            <select
-              style={{ ...styles.input, marginBottom: "15px" }}
-              value={form.new_urgency}
-              onChange={(e) =>
-                setForm({ ...form, new_urgency: e.target.value })
-              }
-            >
-              <option value="normal">Normal</option>
-              <option value="semi-urgent">Semi-Urgent</option>
-              <option value="urgent">Urgent</option>
-              <option value="very_urgent">Very Urgent</option>
-              <option value="high">High</option>
-            </select>
-            <div style={{ display: "flex", gap: "10px" }}>
-              <button style={styles.button} onClick={handleAddEscalation}>
-                ✅ Save
-              </button>
-              <button
-                style={{
-                  ...styles.button,
-                  background: "#ef4444",
-                }}
-                onClick={() => setShowEscalationForm(false)}
-              >
-                ❌ Cancel
-              </button>
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title"> Add Escalation Rule</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  aria-label="Close"
+                  onClick={() => setShowEscalationForm(false)}
+                ></button>
+              </div>
+              <div className="modal-body">
+                <select
+                  className="form-select mb-3"
+                  value={form.symptom_key}
+                  onChange={(e) =>
+                    setForm({ ...form, symptom_key: e.target.value })
+                  }
+                >
+                  <option value="">-- Select Symptom --</option>
+                  {rules.map((r, i) => (
+                    <option key={i} value={r.symptom}>
+                      {r.symptom}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  type="text"
+                  className="form-control mb-3"
+                  value={form.question_pattern}
+                  onChange={(e) =>
+                    setForm({ ...form, question_pattern: e.target.value })
+                  }
+                  placeholder="Question pattern (regex)"
+                />
+                <input
+                  type="text"
+                  className="form-control mb-3"
+                  value={form.trigger_values}
+                  onChange={(e) =>
+                    setForm({ ...form, trigger_values: e.target.value })
+                  }
+                  placeholder="Trigger values (comma separated)"
+                />
+                <select
+                  className="form-select mb-3"
+                  value={form.new_urgency}
+                  onChange={(e) =>
+                    setForm({ ...form, new_urgency: e.target.value })
+                  }
+                >
+                  <option value="normal">Normal</option>
+                  <option value="semi-urgent">Semi-Urgent</option>
+                  <option value="urgent">Urgent</option>
+                  <option value="very_urgent">Very Urgent</option>
+                  <option value="high">High</option>
+                </select>
+              </div>
+              <div className="modal-footer">
+                <button className="btn btn-primary" onClick={handleAddEscalation}>
+                  Save
+                </button>
+                <button
+                  className="btn btn-danger"
+                  onClick={() => setShowEscalationForm(false)}
+                >
+                   Cancel
+                </button>
+              </div>
             </div>
           </div>
         </div>
