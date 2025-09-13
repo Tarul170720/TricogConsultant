@@ -1,0 +1,28 @@
+# Node modules (inside Frontend)
+Frontend/node_modules/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment variables
+Frontend/.env
+Frontend/.env.local
+Frontend/.env.*.local
+
+# Build output
+Frontend/dist/
+Frontend/build/
+Frontend/.cache/
+Frontend/.next/
+Frontend/out/
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
