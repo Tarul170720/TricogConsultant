@@ -96,7 +96,7 @@ export default function AdminPanel({ styles }) {
         new_urgency: "normal",
       });
       setShowEscalationForm(false); // close modal
-      alert("✅ Escalation Rule added!");
+      alert("Escalation Rule added!");
     } catch (err) {
       console.error("Failed to add escalation", err);
     }

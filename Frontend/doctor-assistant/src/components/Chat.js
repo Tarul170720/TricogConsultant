@@ -17,7 +17,6 @@ export default function Chat({
   const [input, setInput] = useState("");
   const { transcript, listening, resetTranscript, browserSupportsSpeechRecognition } =
     useSpeechRecognition();
-
   const timerRef = useRef(null);
 
   // 🗣️ Speak bot messages out loud
@@ -87,13 +86,14 @@ export default function Chat({
   }, [messages]);
 
   if (!browserSupportsSpeechRecognition) {
-    return <span>⚠️ Browser does not support speech recognition.</span>;
+    return <span>⚠Browser does not support speech recognition.</span>;
   }
 
   return (
     <>
-      <div style={styles.chatBox}>
+      <div style={{...styles.chatBox, display: 'flex'}}>
         <MessageList messages={messages} styles={styles} />
+        {isTyping && <div style={styles.typingIndicator}>...</div>}
       </div>
       <div style={styles.inputContainer}>
         <input
