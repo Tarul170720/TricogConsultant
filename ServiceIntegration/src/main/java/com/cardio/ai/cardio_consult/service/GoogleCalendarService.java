@@ -22,10 +22,10 @@ public class GoogleCalendarService {
         this.calendar = calendar;
     }
 
-    public String createMeeting(String userEmail, String organizerEmail, ZonedDateTime startTime, String doctorName) throws IOException {
+    public String createMeeting(String userEmail, String organizerEmail, ZonedDateTime startTime) throws IOException {
         Event event = new Event()
                 .setSummary("Cardiology consult")
-                .setDescription("Consult with Dr." + doctorName +" for " + userEmail + " via CardioConsult");
+                .setDescription("Consult with Doctor for " + userEmail + " via CardioConsult");
 
         EventDateTime start = new EventDateTime()
                 .setDateTime(new DateTime(Date.from(startTime.toInstant())))

@@ -48,7 +48,7 @@ public class GoogleCalendarConfig {
                 .setAccessType("offline")
                 .build();
 
-        LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
+        LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(3000).build();
         return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
     }
 }
