@@ -67,8 +67,15 @@ class SymptomRuleOut(BaseModel):
     urgency: str
 
 
+from pydantic import BaseModel
+from typing import List
+
 class FollowUpRuleOut(BaseModel):
+    id: int
     symptom_key: str
     question_pattern: str
     trigger_values: List[str]
     new_urgency: str
+
+    class Config:
+        orm_mode = True   # ✅ allows FastAPI to accept ORM objects directly
