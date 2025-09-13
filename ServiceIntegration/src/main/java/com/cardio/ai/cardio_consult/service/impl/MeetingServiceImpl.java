@@ -36,9 +36,7 @@ public class MeetingServiceImpl implements MeetingService {
         log.info("Sending calendar invite to user email: {}", meetingRequestDTO);
         try {
             String userEmail = meetingRequestDTO.userEmail();
-            Optional<TimePeriod> nextAvailableSlot = calendarService.findNextAvailableSlot(doctorEmail);
-            TimePeriod timePeriod = nextAvailableSlot.orElseThrow(() -> new RuntimeException("No slots available for the next 3 hours."));
-            String meetLink = calendarService.createMeeting(userEmail, doctorEmail, timePeriod);
+            String meetLink = calendarService.createMeeting(userEmail, doctorEmail, meetingRequestDTO.startTime());
             return ResponseEntity.ok(meetLink);
         } catch (Exception e) {
             log.debug("Exception occured while creating meeting: {}", e.getMessage(), e);

@@ -22,17 +22,18 @@ public class GoogleCalendarService {
         this.calendar = calendar;
     }
 
-    public String createMeeting(String userEmail, String organizerEmail, TimePeriod timePeriod) throws IOException {
+    public String createMeeting(String userEmail, String organizerEmail, ZonedDateTime startTime) throws IOException {
         Event event = new Event()
                 .setSummary("Cardiology consult")
                 .setDescription("consult with doctor for " + userEmail + " via CardioConsult");
 
         EventDateTime start = new EventDateTime()
-                .setDateTime(timePeriod.getStart())
+                .setDateTime(new DateTime(Date.from(startTime.toInstant())))
                 .setTimeZone(TimeZone.getDefault().getID());
         event.setStart(start);
+        ZonedDateTime endTime = startTime.plusMinutes(15);
         EventDateTime end = new EventDateTime()
-                .setDateTime(timePeriod.getEnd())
+                .setDateTime(new DateTime(Date.from(endTime.toInstant())))
                 .setTimeZone(TimeZone.getDefault().getID());
         event.setEnd(end);
 
