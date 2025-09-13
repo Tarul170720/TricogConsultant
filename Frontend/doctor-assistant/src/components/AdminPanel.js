@@ -2,8 +2,10 @@ import { useState, useEffect } from "react";
 import {
   fetchRules,
   addRule,
+  deleteRule,
   fetchEscalations,
   addEscalation,
+  deleteEscalation,
 } from "../services/api";
 import UrgencyBadge from "./UrgencyBadge";
 
@@ -64,6 +66,17 @@ export default function AdminPanel({ styles }) {
     }
   };
 
+  const handleDeleteRule = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this rule?")) return;
+    try {
+      await deleteRule(id);
+      setRules((prev) => prev.filter((r) => r.id !== id));
+      alert("🗑️ Rule deleted!");
+    } catch (err) {
+      console.error("Failed to delete rule", err);
+    }
+  };
+
   const handleAddEscalation = async () => {
     if (!form.symptom_key || !form.question_pattern || !form.trigger_values)
       return;
@@ -89,6 +102,18 @@ export default function AdminPanel({ styles }) {
     }
   };
 
+  const handleDeleteEscalation = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this escalation?"))
+      return;
+    try {
+      await deleteEscalation(id);
+      setEscalations((prev) => prev.filter((e) => e.id !== id));
+      alert("🗑️ Escalation deleted!");
+    } catch (err) {
+      console.error("Failed to delete escalation", err);
+    }
+  };
+
   return (
     <div style={{ maxWidth: "900px", margin: "0 auto", padding: "20px" }}>
       {/* Add Rule Section */}
@@ -97,7 +122,7 @@ export default function AdminPanel({ styles }) {
           border: "1px solid #ddd",
           borderRadius: "10px",
           padding: "20px",
-          marginBottom: "40px", // 🔥 extra space between boxes
+          marginBottom: "40px",
           background: "#fff",
           boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
         }}
@@ -127,7 +152,7 @@ export default function AdminPanel({ styles }) {
           border: "1px solid #ddd",
           borderRadius: "10px",
           padding: "20px",
-          marginBottom: "40px", // 🔥 extra spacing between sections
+          marginBottom: "40px",
           background: "#fff",
           boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
         }}
@@ -170,20 +195,36 @@ export default function AdminPanel({ styles }) {
                 </span>
               </div>
               {expanded === i && (
-                <ul style={{ marginTop: "12px", paddingLeft: "20px" }}>
-                  {r.questions.map((q, j) => (
-                    <li
-                      key={j}
-                      style={{
-                        marginBottom: "6px",
-                        color: "#333",
-                        listStyleType: "disc",
-                      }}
-                    >
-                      {q}
-                    </li>
-                  ))}
-                </ul>
+                <>
+                  <ul style={{ marginTop: "12px", paddingLeft: "20px" }}>
+                    {r.questions.map((q, j) => (
+                      <li
+                        key={j}
+                        style={{
+                          marginBottom: "6px",
+                          color: "#333",
+                          listStyleType: "disc",
+                        }}
+                      >
+                        {q}
+                      </li>
+                    ))}
+                  </ul>
+                  <button
+                    style={{
+                      background: "#ef4444",
+                      color: "white",
+                      border: "none",
+                      padding: "6px 10px",
+                      borderRadius: "6px",
+                      marginTop: "10px",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => handleDeleteRule(r.id)}
+                  >
+                    🗑️ Delete Rule
+                  </button>
+                </>
               )}
             </div>
           ))}
@@ -196,7 +237,7 @@ export default function AdminPanel({ styles }) {
           border: "1px solid #ddd",
           borderRadius: "10px",
           padding: "20px",
-          marginBottom: "40px", // 🔥 spacing from footer/next block
+          marginBottom: "40px",
           background: "#fff",
           boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
         }}
@@ -213,14 +254,14 @@ export default function AdminPanel({ styles }) {
           ➕ Add Escalation Rule
         </button>
 
-        {/* Existing Escalations - Card Style */}
+        {/* Existing Escalations */}
         <h3 style={{ marginTop: "20px", marginBottom: "15px" }}>
           📋 Existing Escalations
         </h3>
         <div
           style={{
             display: "grid",
-            gap: "20px", // 🔥 spacing between escalation cards
+            gap: "20px",
             gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
             marginTop: "10px",
           }}
@@ -231,7 +272,7 @@ export default function AdminPanel({ styles }) {
               style={{
                 border: "1px solid #e5e7eb",
                 borderRadius: "12px",
-                padding: "18px", // 🔥 more padding inside cards
+                padding: "18px",
                 background: "linear-gradient(135deg, #ffffff, #f9fafb)",
                 boxShadow: "0 4px 8px rgba(0,0,0,0.05)",
               }}
@@ -264,10 +305,24 @@ export default function AdminPanel({ styles }) {
               <div style={{ marginBottom: "10px", color: "#374151" }}>
                 <strong>and Answer in:</strong> [{e.trigger_values.join(", ")}]
               </div>
-              <div>
+              <div style={{ marginBottom: "10px" }}>
                 <strong>Escalate to:</strong>{" "}
                 <UrgencyBadge urgency={e.new_urgency} />
               </div>
+              <button
+                style={{
+                  background: "#ef4444",
+                  color: "white",
+                  border: "none",
+                  padding: "6px 10px",
+                  borderRadius: "6px",
+                  marginTop: "8px",
+                  cursor: "pointer",
+                }}
+                onClick={() => handleDeleteEscalation(e.id)}
+              >
+                🗑️ Delete Escalation
+              </button>
             </div>
           ))}
         </div>
