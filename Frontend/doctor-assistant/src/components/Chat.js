@@ -93,7 +93,6 @@ export default function Chat({
     <>
       <div style={{...styles.chatBox, display: 'flex'}}>
         <MessageList messages={messages} styles={styles} />
-        {isTyping && <div style={styles.typingIndicator}>...</div>}
       </div>
       <div style={styles.inputContainer}>
         <input
