@@ -1,6 +1,6 @@
 # Node modules (inside Frontend)
 Frontend/node_modules/
-
+Backend/.env
 # Logs
 npm-debug.log*
 yarn-debug.log*
